@@ -20,8 +20,8 @@ import yaml
 from ghapi.all import GhApi
 from git import Repo
 from simple_parsing.helpers.serialization.serializable import FrozenSerializable
-from swebench.harness.constants import MAP_REPO_VERSION_TO_SPECS
-from swebench.harness.utils import get_environment_yml, get_requirements
+# from swebench.harness.constants import MAP_REPO_VERSION_TO_SPECS
+# from swebench.harness.utils import get_environment_yml, get_requirements
 
 import docker
 import docker.errors
@@ -63,6 +63,19 @@ AGENT_ACTION_TIMEOUT = float(keys_config.get("SWE_AGENT_ACTION_TIMEOUT", 25))
 AGENT_ACTION_NO_OUTPUT_TIMEOUT = float(keys_config.get("SWE_AGENT_ACTION_NO_OUTPUT_TIMEOUT", AGENT_ACTION_TIMEOUT))
 PATH_TO_REQS = "/root/requirements.txt"
 PATH_TO_ENV_YML = "/root/environment.yml"
+
+# EnIGMA: Patched stubs for swe-bench harness functions to remove dependency
+def get_environment_yml(record: dict, env_name: str) -> str | None:
+    """(STUB) Returns the environment.yml content for a given record"""
+    return None
+
+def get_requirements(record: dict, env_name: str) -> str | None:
+    """(STUB) Returns the requirements.txt content for a given record"""
+    return None
+
+# (STUB) The original MAP_REPO_VERSION_TO_SPECS is a large dictionary.
+# We don't need it for our purposes, so we'll use an empty dict.
+MAP_REPO_VERSION_TO_SPECS = {}
 
 
 @dataclass(frozen=True)
