@@ -821,8 +821,11 @@ class InstanceBuilder:
         self.args["version"] = self.args["base_commit"][:7]
 
     def set_repo_info(self, repo: str, base_commit: str | None = None):
+        """Get repo information from repo path"""
         if is_github_repo_url(repo):
             self.set_repo_info_from_gh_url(repo, base_commit=base_commit)
+        elif repo.startswith("local://"):
+            self.set_repo_info_from_local_path(repo.removeprefix("local://"), base_commit=base_commit)
         elif Path(repo).is_dir():
             self.set_repo_info_from_local_path(repo, base_commit=base_commit)
         else:
