@@ -18,7 +18,8 @@ from typing import Any, Callable
 
 from datasets import load_dataset, load_from_disk
 from ghapi.all import GhApi
-from git import InvalidGitRepositoryError, Repo
+from git import Repo
+from git.exc import InvalidGitRepositoryError, NoSuchPathError
 from unidiff import PatchSet
 
 import docker
@@ -815,8 +816,9 @@ class InstanceBuilder:
                     msg = f"Local git repository {path} is dirty. Please commit or stash changes."
                     raise ValueError(msg)
                 self.args["base_commit"] = repo.head.object.hexsha
-            except InvalidGitRepositoryError:
-                # If not a git repo, we can't get a commit hash. This is fine for some local tests.
+            except (InvalidGitRepositoryError, NoSuchPathError):
+                # If not a git repo or path doesn't exist during init,
+                # we can't get a commit hash. This is fine for some local tests.
                 logger.warning(f"Could not find git repository at {path=}. Using 'no_commit' as base_commit.")
                 self.args["base_commit"] = "no_commit"
         self.args["version"] = self.args["base_commit"][:7]
