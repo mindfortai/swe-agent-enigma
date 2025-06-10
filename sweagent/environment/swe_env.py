@@ -218,7 +218,17 @@ class SWEEnv(gym.Env):
         self.container: subprocess.Popen | None = None
         self.docker_compose: Path | None = None
         self.challenge: dict[str, Any] | None = None
-        self._reset_container()
+        
+        # Enigma: Skip container logic and use the current environment
+        self.container = subprocess.Popen(
+            ["/bin/bash", "-l", "-m"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1
+        )
+        self._init_scripts()
 
         self.interactive_session: InteractiveSession | None = None
 
@@ -359,7 +369,7 @@ class SWEEnv(gym.Env):
         self.reward = None
 
         ### Reset Container ###
-        self._init_docker_compose()
+        self._reset_container()
 
         if self.args.cache_task_images:
             cached_image = self._get_cached_task_image_name()
@@ -763,26 +773,8 @@ class SWEEnv(gym.Env):
     # MARK: Helper functions #
 
     def _reset_container(self) -> None:
-        if self.container is not None:
-            try:
-                self.container.terminate()
-            except KeyboardInterrupt:
-                raise
-            except:
-                self.logger.warning("Failed to terminate container", exc_info=True)
-            else:
-                self.logger.debug("Terminated container")
-        if self.docker_compose is not None:
-            try:
-                terminate_docker_compose(self.docker_compose)
-            except KeyboardInterrupt:
-                raise
-            except:
-                self.logger.warning("Failed to terminate docker compose", exc_info=True)
-            else:
-                self.logger.debug("Terminated docker compose")
-        self._init_container()
-        self._init_scripts()
+        # Enigma: This method is now a no-op as we are not using containers.
+        pass
 
     def reset_container(self) -> None:
         self.close()
@@ -806,63 +798,24 @@ class SWEEnv(gym.Env):
         """
         Add the "ctfnet" network interface for all the containers used for CTF challenges
         """
-        assert self.container_name is not None
-        if self.challenge is not None:
-            attach_network_interface_to_container(self.container_name)
+        # Enigma: This method is now a no-op
+        pass
 
     # ctf
     def _init_docker_compose(self) -> None:
         """
         Handles docker compose initialization for challenge with docker compose file.
         """
-        if self.challenge is not None and self.challenge.get("docker_compose") is not None:
-            self.docker_compose = get_docker_compose(self.challenge["docker_compose"])
-            self.logger.info("🌱 Initialized docker compose for challenge")
+        # Enigma: This method is now a no-op
+        pass
 
     def _init_container(self, cached_image: str | None = None) -> None:
         """
         Handles container initialization. Defines container name and creates it.
         If cached_image is provided, it will use that image name instead of the default.
         """
-        image_name = self.image_name
-        if cached_image is not None:
-            image_name = cached_image
-            self.logger.info(f"Using cached image: {image_name}")
-        if self.persistent:
-            assert self.container_name is not None
-        else:
-            # Make sure that we get a new container name just in case removing didn't work.
-            # Might be a fix for https://github.com/swe-agent/SWE-agent/issues/451
-            self.container_name = self._get_container_name(image_name)
-        self.container, self.parent_pids = get_container(
-            self.container_name, image_name, persistent=self.persistent, container_mounts=self.container_mounts
-        )
-        try:
-            client = docker.from_env(timeout=600)
-        except docker.errors.DockerException as e:
-            if "Error while fetching server API version" in str(e):
-                msg = "Docker is not running. Please start Docker and try again."
-            else:
-                msg = "Unknown docker exception occurred. Are you sure docker is running?"
-            raise RuntimeError(msg) from e
-        t0 = time.time()
-        self.container_obj = None
-        while time.time() - t0 < 60:
-            try:
-                self.container_obj = client.containers.get(self.container_name)
-            except docker.errors.NotFound:
-                self.logger.debug("Couldn't find container. Let's wait and retry.")
-                time.sleep(1)
-            else:
-                break
-        else:
-            print(f"{self.persistent=}")
-            available_containers = client.containers.list(all=True)
-            available_containers_info = json.dumps([str(c.attrs) for c in available_containers], indent=2)
-            print(available_containers_info)
-            msg = "Failed to get container object."
-            raise RuntimeError(msg)
-        self.logger.info("🌱 Environment Initialized")
+        # Enigma: This method is now a no-op
+        pass
 
     def _init_scripts(self):
         """
