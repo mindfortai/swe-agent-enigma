@@ -811,23 +811,21 @@ class InstanceBuilder:
         else:
             try:
                 repo = Repo(path, search_parent_directories=True)
-            except InvalidGitRepositoryError as e:
-                msg = f"Could not find git repository at {path=}."
-                raise ValueError(msg) from e
-            if repo.is_dirty() and "PYTEST_CURRENT_TEST" not in os.environ:
-                msg = f"Local git repository {path} is dirty. Please commit or stash changes."
-                raise ValueError(msg)
-            self.args["base_commit"] = repo.head.object.hexsha
+                if repo.is_dirty() and "PYTEST_CURRENT_TEST" not in os.environ:
+                    msg = f"Local git repository {path} is dirty. Please commit or stash changes."
+                    raise ValueError(msg)
+                self.args["base_commit"] = repo.head.object.hexsha
+            except InvalidGitRepositoryError:
+                # If not a git repo, we can't get a commit hash. This is fine for some local tests.
+                logger.warning(f"Could not find git repository at {path=}. Using 'no_commit' as base_commit.")
+                self.args["base_commit"] = "no_commit"
         self.args["version"] = self.args["base_commit"][:7]
 
     def set_repo_info(self, repo: str, base_commit: str | None = None):
-        """Get repo information from repo path"""
         if is_github_repo_url(repo):
             self.set_repo_info_from_gh_url(repo, base_commit=base_commit)
-        elif repo.startswith("local://"):
+        elif repo.startswith("local://") or repo.startswith("/"):
             self.set_repo_info_from_local_path(repo.removeprefix("local://"), base_commit=base_commit)
-        elif Path(repo).is_dir():
-            self.set_repo_info_from_local_path(repo, base_commit=base_commit)
         else:
             msg = f"Could not determine repo path from {repo=}."
             raise ValueError(msg)

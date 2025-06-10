@@ -116,14 +116,6 @@ class ScriptArguments(FlattenedAccess, FrozenSerializable):
     # Run the agent in CTF mode (SWE-agent: EnIGMA)
     ctf: bool = False
 
-    def __post_init__(self):
-        # Enigma: If repo_path is a local path, add the local:// prefix
-        # This is the only place it should be done, as it's passed to the env correctly from here
-        if self.environment.repo_path and not self.environment.repo_path.startswith("local://"):
-            if Path(self.environment.repo_path).exists():
-                logger.info("Local repository path detected, adding 'local://' prefix.")
-                self.environment.repo_path = f"local://{self.environment.repo_path}"
-
     @property
     def run_name(self) -> str:
         """Generate a unique name for this run based on the arguments."""
