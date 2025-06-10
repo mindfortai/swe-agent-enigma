@@ -451,6 +451,12 @@ class AnthropicModel(BaseModel):
             "cost_per_input_token": 2.5e-07,
             "cost_per_output_token": 1.25e-06,
         },
+        "claude-3-5-sonnet-20241022": {
+            "max_context": 200_000,
+            "max_tokens": 4096,
+            "cost_per_input_token": 3e-06,
+            "cost_per_output_token": 1.5e-05,
+        },
     }
 
     SHORTCUTS = {
