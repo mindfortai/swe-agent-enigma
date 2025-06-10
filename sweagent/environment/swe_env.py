@@ -20,6 +20,8 @@ import yaml
 from ghapi.all import GhApi
 from git import Repo
 from simple_parsing.helpers.serialization.serializable import FrozenSerializable
+from swebench.harness.constants import MAP_REPO_VERSION_TO_SPECS
+from swebench.harness.utils import get_environment_yml, get_requirements
 
 import docker
 import docker.errors
@@ -55,18 +57,6 @@ from sweagent.environment.utils import (
 from sweagent.types import AgentInfo
 from sweagent.utils.config import keys_config
 from sweagent.utils.log import default_logger, get_logger
-
-# EnIGMA-compatible stubs for swebench functionality (removed modal dependency)
-# These provide minimal functionality for vulnerability analysis without SWE-bench evaluation
-MAP_REPO_VERSION_TO_SPECS = {}  # Empty dict - not needed for EnIGMA vulnerability analysis
-
-def get_environment_yml(record, env_name=None):
-    """Stub implementation for get_environment_yml - returns empty string for EnIGMA compatibility"""
-    return ""
-
-def get_requirements(record):
-    """Stub implementation for get_requirements - returns empty string for EnIGMA compatibility"""
-    return ""
 
 LONG_TIMEOUT = float(keys_config.get("SWE_AGENT_ENV_LONG_TIMEOUT", 500))
 AGENT_ACTION_TIMEOUT = float(keys_config.get("SWE_AGENT_ACTION_TIMEOUT", 25))
